@@ -39,7 +39,7 @@ async def is_ready() -> tuple[bool, list[str]]:
     return True, models
 
 
-async def _open_chat_stream(payload: dict) -> httpx.Response:
+async def open_chat_stream(payload: dict) -> httpx.Response:
     req = _client.build_request("POST", "/v1/chat/completions", json=payload)
     try:
         resp = await _client.send(req, stream=True)
@@ -59,7 +59,7 @@ async def _open_chat_stream(payload: dict) -> httpx.Response:
 
 
 async def stream_chat(payload: dict) -> AsyncIterator[bytes]:
-    resp = await _open_chat_stream(payload)
+    resp = await open_chat_stream(payload)
     try:
         async for chunk in resp.aiter_bytes():
             yield chunk
