@@ -10,13 +10,13 @@ services:
     #       только модель варианта ${CV_MODEL},
     #       метрики на :8002 вкл. GPU-метрики),
     command:
-      - [ "tritonserver",
-          "--model-repository=/models",
-          "--model-control-mode=explicit",
-          "--load-model=efficientnet_b0",
-          "--metrics-port=8002",
-          "--allow-gpu-metrics=true"]
-    #       проброс GPU (deploy.resources.reservations.devices, driver nvidia).
+      - tritonserver
+      - --model-repository=/models
+      - --model-control-mode=explicit
+      - --load-model=${CV_MODEL}
+      - --metrics-port=8002
+      - --allow-gpu-metrics=true
+    # проброс GPU (deploy.resources.reservations.devices, driver nvidia).
     deploy:
       resources:
         reservations:
@@ -34,16 +34,18 @@ services:
 
   vllm:
     # TODO: image (vLLM — закрепите версию, не latest)
-    image: vllm/vllm-openai:muse-glimmer
-    environment:
-      - LLM_MODEL=Qwen2.5-1.5B-Instruct
+    image: vllm/vllm-openai:v0.32.0
     #, command (--model,
     #       --served-model-name ${LLM_MODEL}, --gpu-memory-utilization, --max-model-len),
     command:
-      ["--model",
-      "--served-model-name ${LLM_MODEL}",
-      "--gpu-memory-utilization",
-      "--max-model-len"]
+      - --model
+      - Qwen/Qwen2.5-1.5B-Instruct
+      - --served-model-name
+      - ${LLM_MODEL}
+      - --gpu-memory-utilization
+      - "0.5"
+      - --max-model-len
+      - "4096"
     # проброс GPU.
     deploy:
       resources:

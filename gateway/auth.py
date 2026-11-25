@@ -37,7 +37,6 @@ def verify_token(
     except jwt.InvalidSignatureError:
         raise _unauthorized("Invalid signature")
     except jwt.InvalidTokenError:
-        # покрывает alg=none, неверный формат, отсутствие exp и т.п.
         raise _unauthorized("Invalid token")
 
     return payload
