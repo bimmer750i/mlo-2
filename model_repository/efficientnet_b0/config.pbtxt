@@ -1,5 +1,5 @@
 name: "efficientnet_b0"
-platform: "onnx"  # Изменено на новый синтаксис, подходит для Triton 2.63.0
+platform: "onnxruntime_onnx"
 max_batch_size: 16
 
 input [
