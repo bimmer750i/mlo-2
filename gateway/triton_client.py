@@ -8,9 +8,11 @@ from config import settings
 _INPUT_NAME = "INPUT__0"
 _OUTPUT_NAME = "OUTPUT__0"
 
+limits = httpx.Limits(max_connections=200, max_keepalive_connections=100)
 _client = httpx.AsyncClient(
     base_url=settings.triton_url,
     timeout=httpx.Timeout(settings.http_timeout),
+    limits=limits
 )
 
 class TritonError(RuntimeError):

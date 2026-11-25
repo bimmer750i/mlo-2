@@ -5,10 +5,11 @@ from collections.abc import AsyncIterator
 import httpx
 
 from config import settings
-
+limits = httpx.Limits(max_connections=200, max_keepalive_connections=100)
 _client = httpx.AsyncClient(
     base_url=settings.vllm_url,
     timeout=httpx.Timeout(settings.http_timeout),
+    limits=limits
 )
 
 
