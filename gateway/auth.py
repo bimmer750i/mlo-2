@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends, HTTPException, Request, status
 
 from config import settings
-
-
-_bearer = HTTPBearer(auto_error=False)
 
 
 def _unauthorized(detail: str = "Invalid or missing token") -> HTTPException:
@@ -17,20 +13,22 @@ def _unauthorized(detail: str = "Invalid or missing token") -> HTTPException:
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-def verify_token(
-        creds: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)] = None,
-) -> dict:
 
-    if creds is None or not creds.credentials:
+def verify_token(request: Request) -> dict:
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
         raise _unauthorized("Missing Bearer token")
 
-    token = creds.credentials
+    token = auth[len("Bearer "):].strip()
+    if not token:
+        raise _unauthorized("Missing Bearer token")
+
     try:
         payload = jwt.decode(
             token,
             settings.jwt_secret,
-            algorithms=["HS256"],  # явно: отклоняет alg=none и чужие алгоритмы
-            options={"require": ["exp"]},  # токен обязан иметь exp
+            algorithms=["HS256"],  # отклоняет alg=none и чужие алгоритмы
+            options={"require": ["exp"]},
         )
     except jwt.ExpiredSignatureError:
         raise _unauthorized("Token expired")
@@ -40,5 +38,6 @@ def verify_token(
         raise _unauthorized("Invalid token")
 
     return payload
+
 
 require_auth = Depends(verify_token)
